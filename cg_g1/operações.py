@@ -325,7 +325,7 @@ class Operações:
                     if pixel < menor_valor:
                         menor_valor = pixel
 
-                    matriz_imagem[x][y] = tuple(pixel)
+                    matriz_imagem[x][y] = pixel
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
