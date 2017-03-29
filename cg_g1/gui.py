@@ -242,11 +242,11 @@ class Ui_MainWindow(QtGui.QMainWindow):
             self, 'Abrir Arquivo', '', 'Todos os arquivos (*.*);;jpeg (*.jpeg);;jpg (*.jpg);;png (*.png)')
 
         if caminho_imagem:
-            self.operações.carregarImagem1(str(caminho_imagem))
+            self.operações.carregar_imagem_1(str(caminho_imagem))
             self.imagem1.Qimg = ImageQt.ImageQt(
-                self.operações.imagem1.convert('RGB') if self.operações.imagem1.mode == 'L' else self.operações.imagem1)
+                self.operações.imagem_1.convert('RGB') if self.operações.imagem_1.mode == 'L' else self.operações.imagem_1)
             self.imagem1.repaint()
-            self.refreshAll()
+            self.atualizar()
             self.menuOperações.setEnabled(True)
             self.menuFiltros.setEnabled(True)
 
@@ -255,129 +255,91 @@ class Ui_MainWindow(QtGui.QMainWindow):
             self, 'Abrir Arquivo', '', 'Todos os arquivos (*.*);;jpeg (*.jpeg);;jpg (*.jpg);;png (*.png)')
 
         if caminho_imagem:
-            self.operações.carregarImagem2(str(caminho_imagem))
+            self.operações.carregar_imagem_2(str(caminho_imagem))
             self.imagem2.Qimg = ImageQt.ImageQt(
-                self.operações.imagem2.convert('RGB') if self.operações.imagem2.mode == 'L' else self.operações.imagem2)
+                self.operações.imagem_2.convert('RGB') if self.operações.imagem_2.mode == 'L' else self.operações.imagem_2)
             self.imagem2.repaint()
 
-    def repaintImage(self):
-        self.imagem3.Qimg = ImageQt.ImageQt(self.operações.imagemFinal)
+    def atualizar(self):
+        self.imagem3.Qimg = ImageQt.ImageQt(self.operações.imagem_final)
         self.imagem3.repaint()
 
-    def refreshAll(self):
-        self.repaintImage()
-
-    def stretchHisto(self):
-        self.operações.stretchHisto()
-        self.refreshAll()
-
-    def shrinkHisto(self):
-        minR = self.showIntDialog('Histogram Min Shrink', 'Shrink Min:')
-        if minR:
-            maxR = self.showIntDialog('Histogram Max Shrink', 'Shrink Max:')
-            if maxR:
-                self.operações.shrinkHisto(minR, maxR)
-                self.refreshAll()
-            else:
-                QtGui.QMessageBox.critical(self, "Error", "Provide the the Max")
-        else:
-            QtGui.QMessageBox.critical(self, "Error", "Provide the the Min")
-
-    def slidesLeftHisto(self):
-        amount = self.showIntDialog('Slide Histogram, Left', 'Sliding Amount:')
-        if amount:
-            self.operações.slidesLeftHisto(amount)
-            self.refreshAll()
-        else:
-            QtGui.QMessageBox.critical(self, "Error", "Provide the amount of sliding")
-
-    def slidesRightHisto(self):
-        amount = self.showIntDialog('Slide Histogram, Right', 'Sliding Amount:')
-        if amount:
-            self.operações.slidesRightHisto(amount)
-            self.refreshAll()
-        else:
-            QtGui.QMessageBox.critical(self, "Error", "You have to fill the By")
-
-    def histogramEqualization(self):
-        self.operações.histogramEqualization()
-        self.refreshAll()
-
     def negativo(self):
+        print('Iniciando negativo')
         self.operações.negativo()
-        self.refreshAll()
+        self.atualizar()
+        print('Negativo finalizado')
 
     def limiarizacao(self):
         num, ok = QtGui.QInputDialog.getInt(self, '', 'Entre com o limiar (0 a 255)')
 
         if ok:
+            print('Iniciando limiarização')
             self.operações.limiarização(num)
-            self.refreshAll()
+            self.atualizar()
+            print('Limiarização finalizada')
 
     def operacao_and(self):
-        if self.operações.imagem2 != None:
+        if self.operações.imagem_2 != None:
             print('Iniciando operação AND')
             self.operações.operação_and()
-            self.refreshAll()
+            self.atualizar()
+            print('Operação AND finalizada')
 
     def operacao_or(self):
-        if self.operações.imagem2 != None:
+        if self.operações.imagem_2 != None:
             print('Iniciando operação OR')
             self.operações.operação_or()
-            self.refreshAll()
+            self.atualizar()
+            print('Operação OR finalizada')
 
     def soma(self):
-        if self.operações.imagem2 != None:
-            print('Inciando soma')
+        if self.operações.imagem_2 != None:
+            print('Iniciando soma')
             self.operações.soma()
-            self.refreshAll()
+            self.atualizar()
+            print('Soma finalizada')
 
     def subtracao(self):
-        if self.operações.imagem2 != None:
+        if self.operações.imagem_2 != None:
             print('Inciando subtração')
             self.operações.subtração()
-            self.refreshAll()
+            self.atualizar()
+            print('Subtração finalizada')
 
     def multiplicacao(self):
-        if self.operações.imagem2 != None:
+        if self.operações.imagem_2 != None:
             print('Inciando multiplicação')
             self.operações.multiplicação()
-            self.refreshAll()
+            self.atualizar()
+            print('Multiplicação finalizada')
 
     def divisao(self):
-        if self.operações.imagem2 != None:
+        if self.operações.imagem_2 != None:
             print('Inciando divisão')
             self.operações.divisão()
-            self.refreshAll()
+            self.atualizar()
+            print('Divisão finalizada')
 
     def equalizacao(self):
         print('Inciando equalização')
         self.operações.equalização()
-        self.refreshAll()
+        self.atualizar()
+        print('Equalização finalizada')
 
     def filtroSuavizacao(self):
         num, ok = QtGui.QInputDialog.getInt(self, '', 'Entre com o tamanho da máscara (número ímpar maior do que 2)')
 
         if ok and num > 2 and num % 2 != 0:
             print('Iniciando suavização')
-            self.operações.filtroSuavização(num)
-            self.refreshAll()
+            self.operações.filtro_suavização(num)
+            self.atualizar()
+            print('Suavização finalizada')
 
     def filtroRealce(self):
         print('Iniciando realce')
-        self.operações.filtroRealce()
-        self.refreshAll()
-
-    def meanFilter(self):
-        self.operações.meanFilter()
-        self.refreshAll()
-
-    def medianFilter(self):
-        self.operações.medianFilter()
-        self.refreshAll()
-
-    def edgeDetection(self):
-        self.operações.edgeDetection()
-        self.refreshAll()
+        self.operações.filtro_realce()
+        self.atualizar()
+        print('Realce finalizado')
 
 

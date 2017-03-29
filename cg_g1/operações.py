@@ -2,226 +2,235 @@ from PIL import Image
 import math
 
 
-class Operações():
+class Operações:
     def __init__(self):
-        self.imagemFinal = None
-        self.imagem1 = None
-        self.imagem2 = None
+        self.imagem_final = None
+        self.imagem_1 = None
+        self.imagem_2 = None
 
-    def carregarImagem1(self, imagem):
-        self.imagem1 = Image.open(imagem)
-        self.imagemFinal = self.imagem1
+    def carregar_imagem_1(self, imagem):
+        self.imagem_1 = Image.open(imagem)
+        self.imagem_final = self.imagem_1
 
-    def carregarImagem2(self, imagem):
-        self.imagem2 = Image.open(imagem)
+    def carregar_imagem_2(self, imagem):
+        self.imagem_2 = Image.open(imagem)
 
     def negativo(self):
-        largura, altura = self.imagemFinal.size
+        largura, altura = self.imagem_final.size
 
-        if self.imagemFinal.mode != 'L':
-            canal = self.imagemFinal.layers
+        if self.imagem_final.mode != 'L':
+            canal = self.imagem_final.layers
             for i in range(largura):
                 for j in range(altura):
                     valor = []
                     for k in range(canal):
-                        valor.append(255 - self.imagemFinal.getpixel((i,j))[k])
-                    self.imagemFinal.putpixel((i,j),tuple(valor))
+                        valor.append(255 - self.imagem_final.getpixel((i, j))[k])
+                    self.imagem_final.putpixel((i, j), tuple(valor))
         else:
             for i in range(largura):
                 for j in range(altura):
-                    valor = 255 - self.imagemFinal.getpixel((i,j))
-                    self.imagemFinal.putpixel((i,j), valor)
+                    valor = 255 - self.imagem_final.getpixel((i, j))
+                    self.imagem_final.putpixel((i, j), valor)
 
     def limiarização(self, limiar):
-        self.imagemFinal = self.limiarização_imagem(limiar, self.imagemFinal)
+        self.imagem_final = self.limiarização_imagem(limiar, self.imagem_final)
 
-    def limiarização_imagem(self, limiar, imagem):
+    @staticmethod
+    def limiarização_imagem(limiar, imagem):
         largura, altura = imagem.size
 
         imagem = imagem.convert("L")
 
-        for i in range(largura):
-            for j in range(altura):
-                if imagem.getpixel((i,j)) <= limiar:
-                    imagem.putpixel((i,j), 0)
+        for x in range(largura):
+            for y in range(altura):
+                if imagem.getpixel((x, y)) <= limiar:
+                    imagem.putpixel((x, y), 0)
                 else:
-                    imagem.putpixel((i,j), 255)
+                    imagem.putpixel((x, y), 255)
         return imagem
 
     def operação_and(self):
-        self.operaçãoLógica(lambda valor1, valor2: valor1 and valor2)
+        self.imagem_final = self.operação_lógica(lambda valor_1, valor_2: valor_1 and valor_2,
+                                                 self.imagem_1, self.imagem_2)
 
     def operação_or(self):
-        self.operaçãoLógica(lambda valor1, valor2: valor1 or valor2)
+        self.imagem_final = self.operação_lógica(lambda valor_1, valor_2: valor_1 or valor_2,
+                                                 self.imagem_1, self.imagem_2)
 
-    def operaçãoLógica(self, f):
-        imagem1 = self.limiarização_imagem(127, self.imagem1)
-        imagem2 = self.limiarização_imagem(127, self.imagem2)
+    def operação_lógica(self, f, imagem_1, imagem_2):
+        imagem_1 = self.limiarização_imagem(127, imagem_1)
+        imagem_2 = self.limiarização_imagem(127, imagem_2)
 
-        self.imagemFinal = imagem1
+        imagem_final = imagem_1
 
-        largura1, altura1 = imagem1.size
-        largura2, altura2 = imagem2.size
+        largura_1, altura_1 = imagem_1.size
+        largura_2, altura_2 = imagem_2.size
 
-        for i in range(largura1):
-            if i > largura2 - 1:
+        for i in range(largura_1):
+            if i > largura_2 - 1:
                 break
-            for j in range(altura1):
-                if j > altura2 - 1:
+            for j in range(altura_1):
+                if j > altura_2 - 1:
                     break
-                if f(bool(imagem1.getpixel((i, j))), bool(imagem2.getpixel((i, j)))):
-                    self.imagemFinal.putpixel((i, j), 255)
+                if f(bool(imagem_1.getpixel((i, j))), bool(imagem_2.getpixel((i, j)))):
+                    imagem_final.putpixel((i, j), 255)
                 else:
-                    self.imagemFinal.putpixel((i, j), 0)
+                    imagem_final.putpixel((i, j), 0)
+
+        return imagem_final
 
     def soma(self):
-        self.imagemFinal = self.operaçãoAritmética(lambda parcela1, parcela2: parcela1 + parcela2, self.imagem1, self.imagem2)
+        self.imagem_final = self.operação_aritmética(lambda valor_1, valor_2: valor_1 + valor_2,
+                                                     self.imagem_1, self.imagem_2)
 
     def subtração(self):
-        self.imagemFinal = self.operaçãoAritmética(lambda minuendo, subtraendo: minuendo - subtraendo, self.imagem1, self.imagem2)
+        self.imagem_final = self.operação_aritmética(lambda valor_1, valor_2: valor_1 - valor_2,
+                                                     self.imagem_1, self.imagem_2)
 
     def multiplicação(self):
-        self.imagemFinal = self.operaçãoAritmética(lambda multiplacando, multiplicador: multiplacando * multiplicador, self.imagem1, self.imagem2)
+        self.imagem_final = self.operação_aritmética(lambda valor_1, valor_2: valor_1 * valor_2,
+                                                     self.imagem_1, self.imagem_2)
 
     def divisão(self):
-        self.imagemFinal = self.operaçãoAritmética(lambda numerador, denominador: numerador / (denominador + 1), self.imagem1, self.imagem2)
+        self.imagem_final = self.operação_aritmética(lambda valor_1, valor_2: valor_1 / (valor_2 + 1),
+                                                     self.imagem_1, self.imagem_2)
 
-    def operaçãoAritmética(self, f, imagem1, imagem2):
-        imagemFinal = imagem1
+    def operação_aritmética(self, f, imagem_1, imagem_2):
+        imagem_final = imagem_1
 
-        largura1, altura1 = imagem1.size
-        largura2, altura2 = imagem2.size
+        largura_1, altura_1 = imagem_1.size
+        largura_2, altura_2 = imagem_2.size
 
-        intensidades = []
+        matriz_imagem = []
 
-        for i in range(largura1):
-            intensidades.append([])
-            for j in range(altura1):
-                intensidades[-1].append(imagemFinal.getpixel((i, j)))
+        for x in range(largura_1):
+            matriz_imagem.append([])
+            for y in range(altura_1):
+                matriz_imagem[-1].append(imagem_final.getpixel((x, y)))
 
-        canal = imagemFinal.layers
-        maiorValor, menorValor = [0] * canal, [255] * canal
+        canal = imagem_final.layers
+        maior_valor, menor_valor = [0] * canal, [255] * canal
 
-        for i in range(largura1):
-            if i > largura2 - 1:
+        for x in range(largura_1):
+            if x > largura_2 - 1:
                 break
-            for j in range(altura1):
-                if j > altura2 - 1:
+            for y in range(altura_1):
+                if y > altura_2 - 1:
                     break
 
                 pixel = []
                 for k in range(canal):
-                    valor = f(imagem1.getpixel((i, j))[k], imagem2.getpixel((i, j))[k])
+                    valor = f(imagem_1.getpixel((x, y))[k], imagem_2.getpixel((x, y))[k])
 
-                    if valor > maiorValor[k]:
-                        maiorValor[k] = valor
-                    if valor < menorValor[k]:
-                        menorValor[k] = valor
+                    if valor > maior_valor[k]:
+                        maior_valor[k] = valor
+                    if valor < menor_valor[k]:
+                        menor_valor[k] = valor
 
                     pixel.append(valor)
-                intensidades[i][j] = tuple(pixel)
+                matriz_imagem[x][y] = tuple(pixel)
 
-        for i in range(largura1):
-            if i > largura2 - 1:
+        for x in range(largura_1):
+            if x > largura_2 - 1:
                 break
-            for j in range(altura1):
-                if j > altura2 - 1:
+            for y in range(altura_1):
+                if y > altura_2 - 1:
                     break
 
                 pixel = []
                 for k in range(canal):
-                    pixel.append(int(self.escalonamento(255, maiorValor[k], menorValor[k], intensidades[i][j][k])))
+                    pixel.append(int(self.escalonamento(maior_valor[k], menor_valor[k], matriz_imagem[x][y][k])))
 
-                imagemFinal.putpixel((i, j), tuple(pixel))
+                imagem_final.putpixel((x, y), tuple(pixel))
 
-        return imagemFinal
+        return imagem_final
 
-    def escalonamento(self, M, tmax, tmin, t):
-        return (M/(tmax - tmin))*(t - tmin)
+    @staticmethod
+    def escalonamento(tmax, tmin, t):
+        return (255/(tmax - tmin))*(t - tmin)
 
     def equalização(self):
-        self.imagemFinal = self.imagem1
+        # self.imagem_final = self.imagem_1
         intensidades = self.h()
         intensidades_norm = self.h_norm(intensidades)
         intensidades_acum_norm = self.h_acum_norm(intensidades_norm)
         self.equalizar(intensidades_acum_norm)
 
     def h(self):
-        largura, altura = self.imagemFinal.size
+        largura, altura = self.imagem_final.size
 
         intensidades = []
 
-        if self.imagemFinal.mode != 'L':
-            for i in range(self.imagemFinal.layers):
+        if self.imagem_final.mode != 'L':
+            for x in range(self.imagem_final.layers):
                 intensidades.append([])
-                for j in range(0, 256):
+                for y in range(0, 256):
                     intensidades[-1].append(0)
+            for x in range(largura):
+                for y in range(altura):
+                    for z, canal in enumerate(self.imagem_final.getpixel((x, y))):
+                        intensidades[z][canal] += 1
         else:
-            for i in range(1):
+            for x in range(1):
                 intensidades.append([])
-                for j in range(0, 256):
+                for y in range(0, 256):
                     intensidades[-1].append(0)
-
-        for x in range(largura):
-            for y in range(altura):
-                if self.imagemFinal.mode != 'L':
-                    for c, canal in enumerate(self.imagemFinal.getpixel((x,y))):
-                        intensidades[c][canal] += 1
-                else:
-                    intensidades[0][self.imagemFinal.getpixel((x,y))] += 1
-
-        print(intensidades)
+            for x in range(largura):
+                for y in range(altura):
+                    intensidades[0][self.imagem_final.getpixel((x, y))] += 1
 
         return intensidades
 
     def h_norm(self, intensidades):
-        M, N = self.imagemFinal.size
+        largura, altura = self.imagem_final.size
 
         intensidades_norm = []
         for i in range(len(intensidades[0])):
-            intensidades_norm.append([valor / (M * N) for valor in intensidades[0]])
+            intensidades_norm.append([valor / (largura * altura) for valor in intensidades[0]])
 
         return intensidades_norm
 
-    def h_acum_norm(self, intensidades_norm):
+    @staticmethod
+    def h_acum_norm(intensidades_norm):
         intensidades_acum_norm = intensidades_norm
 
-        for i, canal in enumerate(intensidades_acum_norm):
-            for j, valor in enumerate(canal):
-                if j != 0:
-                    intensidades_acum_norm[i][j] += intensidades_acum_norm[i][j - 1]
+        for x, canal in enumerate(intensidades_acum_norm):
+            for y, valor in enumerate(canal):
+                if y != 0:
+                    intensidades_acum_norm[x][y] += intensidades_acum_norm[x][y - 1]
 
         return intensidades_acum_norm
 
     def equalizar(self, intensidades_acum_norm):
-        largura, altura = self.imagemFinal.size
+        largura, altura = self.imagem_final.size
 
-        if self.imagemFinal.mode != 'L':
-            canal = self.imagemFinal.layers
+        if self.imagem_final.mode != 'L':
+            canal = self.imagem_final.layers
 
             for x in range(largura):
                 for y in range(altura):
                     pixel = []
                     for z in range(canal):
-                        pixel.append(int(intensidades_acum_norm[z][self.imagemFinal.getpixel((x,y))[z]] * 255))
-                    self.imagemFinal.putpixel((x,y),tuple(pixel))
+                        pixel.append(int(intensidades_acum_norm[z][self.imagem_final.getpixel((x, y))[z]] * 255))
+                    self.imagem_final.putpixel((x, y), tuple(pixel))
         else:
             for x in range(largura):
                 for y in range(altura):
-                    self.imagemFinal.putpixel((x,y),int(intensidades_acum_norm[self.imagemFinal.getpixel((x,y))] * 255))
+                    valor = intensidades_acum_norm[0][self.imagem_final.getpixel((x, y))] * 255
+                    self.imagem_final.putpixel((x, y), int(valor))
 
-    def filtroSuavização(self, valor):
+    def filtro_suavização(self, valor):
         máscara = []
         for x in range(valor):
             máscara.append([1]*valor)
         print(máscara)
 
-        largura, altura = self.imagemFinal.size
+        largura, altura = self.imagem_final.size
 
-        if self.imagemFinal.mode != 'L':
-            canal = self.imagemFinal.layers
+        if self.imagem_final.mode != 'L':
+            canal = self.imagem_final.layers
 
-            offset = math.floor(valor/2)
+            offset = int(math.floor(valor/2))
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
@@ -230,12 +239,13 @@ class Operações():
                         aux = 0
                         for x2 in range(valor):
                             for y2 in range(valor):
-                                aux += máscara[x2][y2] * self.imagemFinal.getpixel(((x - offset) + x2, (y-offset) + y2))[z]
+                                aux += máscara[x2][y2] * \
+                                       self.imagem_final.getpixel(((x - offset) + x2, (y - offset) + y2))[z]
                         pixel.append(int(aux/valor**2))
-                    print(x, y, pixel)
-                    self.imagemFinal.putpixel((x,y), tuple(pixel))
+
+                    self.imagem_final.putpixel((x, y), tuple(pixel))
         else:
-            offset = math.floor(valor / 2)
+            offset = int(math.floor(valor / 2))
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
@@ -243,42 +253,33 @@ class Operações():
                     for x2 in range(valor):
                         for y2 in range(valor):
                             pixel += máscara[x2][y2] * \
-                                   self.imagemFinal.getpixel(((x - offset) + x2, (y - offset) + y2))
+                                   self.imagem_final.getpixel(((x - offset) + x2, (y - offset) + y2))
                     pixel = pixel / valor ** 2
-                    print(x, y, pixel)
-                    self.imagemFinal.putpixel((x, y), int(pixel))
 
-    def filtroRealce(self):
-        print('Realçando com a primeira máscara')
-        máscara = [[-1,-1,-1],
-                   [0,0,0],
-                   [1,1,1]]
-        imagem1 = self.realçar(self.imagem1, máscara)
-        máscara = [[-1,0,1],
-                   [-1,0,1],
-                   [-1,0,1]]
-        print('Realçando com a segunda máscara')
-        imagem2 = self.realçar(self.imagem1, máscara)
+                    self.imagem_final.putpixel((x, y), int(pixel))
 
-        print('Calculando imagem final')
-        self.imagemFinal = self.operaçãoAritmética(lambda a, b: math.sqrt(a**2+b**2), imagem1, imagem2)
+    def filtro_realce(self):
+        máscara = [[-1, -1, -1],
+                   [-1, 8, -1],
+                   [-1, -1, -1]]
+        self.imagem_final = self.realçar(self.imagem_1, máscara)
 
     def realçar(self, imagem, máscara):
-        imagemFinal = imagem
-        largura, altura = imagemFinal.size
+        imagem_final = imagem
+        largura, altura = imagem_final.size
 
-        matrizImagem = []
+        matriz_imagem = []
 
         for i in range(largura):
-            matrizImagem.append([])
+            matriz_imagem.append([])
             for j in range(altura):
-                matrizImagem[-1].append(imagemFinal.getpixel((i, j)))
+                matriz_imagem[-1].append(imagem_final.getpixel((i, j)))
 
-        if imagemFinal.mode != 'L':
-            canal = imagemFinal.layers
-            maiorValor, menorValor = [0] * canal, [255] * canal
+        if imagem_final.mode != 'L':
+            canal = imagem_final.layers
+            maior_valor, menor_valor = [-25500] * canal, [25500] * canal
 
-            offset = math.floor(len(máscara) / 2)
+            offset = int(math.floor(len(máscara) / 2))
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
@@ -287,27 +288,29 @@ class Operações():
                         aux = 0
                         for x2 in range(len(máscara)):
                             for y2 in range(len(máscara)):
-                                aux += máscara[x2][y2] * imagemFinal.getpixel(((x - offset) + x2, (y - offset) + y2))[z]
+                                aux += máscara[x2][y2] * \
+                                       imagem_final.getpixel(((x - offset) + x2, (y - offset) + y2))[z]
 
-                        if aux > maiorValor[z]:
-                            maiorValor[z] = aux
-                        if aux < menorValor[z]:
-                            menorValor[z] = aux
+                        if aux > maior_valor[z]:
+                            maior_valor[z] = aux
+                        if aux < menor_valor[z]:
+                            menor_valor[z] = aux
 
                         pixel.append(aux)
-                    matrizImagem[x][y] = tuple(pixel)
+                    matriz_imagem[x][y] = tuple(pixel)
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
                     pixel = []
                     for k in range(canal):
-                        pixel.append(int(self.escalonamento(255, maiorValor[k], menorValor[k], matrizImagem[x][y][k])))
+                        valor = self.escalonamento(maior_valor[k], menor_valor[k], matriz_imagem[x][y][k])
+                        pixel.append(int(valor))
 
-                    imagemFinal.putpixel((x, y), tuple(pixel))
-
-
+                    imagem_final.putpixel((x, y), tuple(pixel))
         else:
-            offset = math.floor(len(máscara) / 2)
+            maior_valor, menor_valor = -25500, 25500
+
+            offset = int(math.floor(len(máscara) / 2))
 
             for x in range(offset, largura - offset):
                 for y in range(offset, altura - offset):
@@ -315,7 +318,19 @@ class Operações():
                     for x2 in range(len(máscara)):
                         for y2 in range(len(máscara)):
                             pixel += máscara[x2][y2] * \
-                                   self.imagemFinal.getpixel(((x - offset) + x2, (y - offset) + y2))
-                    imagemFinal.putpixel((x, y), int(pixel))
+                                   imagem_final.getpixel(((x - offset) + x2, (y - offset) + y2))
 
-        return imagemFinal
+                    if pixel > maior_valor:
+                        maior_valor = pixel
+                    if pixel < menor_valor:
+                        menor_valor = pixel
+
+                    matriz_imagem[x][y] = tuple(pixel)
+
+            for x in range(offset, largura - offset):
+                for y in range(offset, altura - offset):
+                    pixel = self.escalonamento(maior_valor, menor_valor, matriz_imagem[x][y])
+
+                    imagem_final.putpixel((x, y), int(pixel))
+
+        return imagem_final
